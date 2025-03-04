@@ -11,11 +11,12 @@ public class Interface {
         Scanner scanner = new Scanner(System.in);
 
         while(true) {
-            System.out.println("Please choose an action.\n" +
-                    "-------------------------\n" +
-                    "1: File functions (Write to/Read from file | Open/Close file) \n" +
-                    "2: Book/Remove/Find/Edit events \n" +
-                    "3: Need help?");
+            System.out.println("""
+                    Please choose an action.
+                    -------------------------
+                    1: File functions (Write to/Read from file | Open/Close file)\s
+                    2: Book/Remove/Find/Edit events\s
+                    3: Need help?""");
 
             while(!scanner.hasNextInt()){
                 System.out.println("Error, invalid number entered!");
@@ -46,12 +47,14 @@ public class Interface {
         Scanner scanner = new Scanner(System.in);
 
         while(true) {
-            System.out.println("Please choose an action.\n" +
-                    "-------------------------\n" +
-                    "0: Return to the main menu \n" +
-                    "1: Save the current callender to a .txt file (Write to/Read from file | Open/Close file) \n" +
-                    "2: Read a new callender from a .txt file \n" +
-                    "3: Save as a custom file format (May cause errors if the type is incopatible, use with caution) \n");
+            System.out.println("""
+                    Please choose an action.
+                    -------------------------
+                    0: Return to the main menu\s
+                    1: Save the current callender to a .txt file (Write to/Read from file | Open/Close file)\s
+                    2: Read a new callender from a .txt file\s
+                    3: Save as a custom file format (May cause errors if the type is incopatible, use with caution)\s
+                    """);
 
             while(!scanner.hasNextInt()){
                 System.out.println("Error, invalid number entered!");
@@ -59,6 +62,7 @@ public class Interface {
             }
 
             action = scanner.nextInt();
+            //All actions must lead back to the main menu at the end!
             switch (action) {
                 case 0: //Return to main menu
                     mainMenu();
@@ -79,15 +83,17 @@ public class Interface {
         Scanner scanner = new Scanner(System.in);
 
         while(true) {
-            System.out.println("Please choose an action.\n" +
-                    "-------------------------\n" +
-                    "0: Return to main menu\n" +
-                    "1: Add new event to the calendar  \n" +
-                    "2: Remove an event\n" +
-                    "3: Edit an event" +
-                    "4: Mark a day as a holiday" +
-                    "5: Search for events\n" +
-                    "6: Search for free space in your schedule\n");
+            System.out.println("""
+                    Please choose an action.
+                    -------------------------
+                    0: Return to main menu
+                    1: Add new event to the calendar \s
+                    2: Remove an event
+                    3: Edit an event\
+                    4: Mark a day as a holiday\
+                    5: Search for events
+                    6: Search for free space in your schedule
+                    """);
 
             while(!scanner.hasNextInt()){
                 System.out.println("Error, invalid number entered!");
@@ -95,6 +101,7 @@ public class Interface {
             }
 
             action = scanner.nextInt();
+            //All actions must lead back to the main menu at the end!
             switch (action) {
                 case 0: //Return to main menu
                     mainMenu();
