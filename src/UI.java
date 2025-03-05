@@ -1,10 +1,11 @@
 import java.util.Scanner;
 
 //The class responsible for all menu functions
-public class Interface {
+//TODO: Make sure all menus are accurate, polish accordingly
+public class UI {
 
     private int action = 0;
-    public Interface(){}
+    public UI(){}
 
     public void mainMenu()
     {
@@ -45,15 +46,16 @@ public class Interface {
     public void fileMenu()
     {
         Scanner scanner = new Scanner(System.in);
-
+        FileController fileController = new FileController();
         while(true) {
             System.out.println("""
                     Please choose an action.
                     -------------------------
                     0: Return to the main menu\s
-                    1: Save the current callender to a .txt file (Write to/Read from file | Open/Close file)\s
-                    2: Read a new callender from a .txt file\s
-                    3: Save as a custom file format (May cause errors if the type is incopatible, use with caution)\s
+                    1: Save the current calendar to a .txt file\s
+                    2: Read a new calendar from a .txt file\s
+                    3: Save as a custom file format (May cause errors if the type is incompatible, use with caution)\s
+                    4: Merge the calendar with a file\s 
                     """);
 
             while(!scanner.hasNextInt()){
@@ -66,11 +68,17 @@ public class Interface {
             switch (action) {
                 case 0: //Return to main menu
                     mainMenu();
-                case 1: //Basic file actions - open/close/save/save as
+                case 1: //Write the calendar data to a text file || TODO:Insert a check for empty calendar and warn the user
+                    fileController.writeToTxt();
                     break;
-                case 2: //Basic data actions - book/remove/find
+                case 2: //Override the calendar with a text file
+                    fileController.readFile();
                     break;
-                case 3://Data editing actions
+                case 3://Save the calendar as a custom file
+                    fileController.writeToFile();
+                    break;
+                case 4://Merge the data from a file with the current calendar data
+                    fileController.mergeData();
                     break;
                 default:
                     System.out.println("Number out of range! Please choose a valid option.");
@@ -81,7 +89,7 @@ public class Interface {
     public void bookingsMenu()
     {
         Scanner scanner = new Scanner(System.in);
-
+        Calendar calendar = Calendar.getInstance();
         while(true) {
             System.out.println("""
                     Please choose an action.
@@ -106,6 +114,7 @@ public class Interface {
                 case 0: //Return to main menu
                     mainMenu();
                 case 1: //Add a new event
+
                     break;
                 case 2: //Remove an event
                     break;

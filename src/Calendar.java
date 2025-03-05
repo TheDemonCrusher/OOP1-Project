@@ -1,6 +1,8 @@
+import java.util.ArrayList;
+import java.util.List;
 public class Calendar {
 
-    private Event[] events;
+    public List<Event> events = new ArrayList<>();
     //The calendar is a singleton since we only have one active calendar in the app at once
     private static Calendar calendarInstance;
 
@@ -13,8 +15,15 @@ public class Calendar {
         return calendarInstance;
     }
 
-    public void setEvents(Event[] events) {
+    public void setEvents(List<Event> events) {
         this.events = events;
+    }
+
+    public void sortByDate(){}
+
+    public void addEvent(Event event)
+    {
+        events.add(event);
     }
 
     public String printEvents()
