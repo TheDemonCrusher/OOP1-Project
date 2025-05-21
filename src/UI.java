@@ -63,7 +63,7 @@ public class UI {
             //All actions must lead back to the main menu at the end!
             switch (action.toLowerCase()) {
                 case "menu": //Return to main menu
-                    mainMenu();
+                    return;
                 case "write": //Write the calendar data to a text file ||
                     fileController.writeToTxt();
                     break;
@@ -113,7 +113,7 @@ public class UI {
             //All actions must lead back to the main menu at the end!
             switch (action.toLowerCase()) {
                 case "menu": //Return to main menu
-                    mainMenu();
+                    return;
                 case "book": //Add a new event
                     if(calendar.book(calendar.createEvent()))
                         System.out.println("Successfully added event!");
@@ -133,9 +133,9 @@ public class UI {
                             scanner.nextLine();
                         }
                         choice = scanner.nextInt();
-                    }while(choice < 0 || choice > calendar.events.size() - 1);
+                    }while(choice < 0 || choice > calendar.getEvents().size() - 1);
 
-                    calendar.change(calendar.events.get(choice));
+                    calendar.change(calendar.getEvents().get(choice));
                     break;
                 case "holiday": //Mark a day as a holiday
                     calendar.printEvents();
@@ -146,8 +146,8 @@ public class UI {
                             scanner.nextLine();
                         }
                         choice = scanner.nextInt();
-                    }while(choice < 0 || choice > calendar.events.size() - 1);
-                    calendar.events.get(choice).setHoliday(true);
+                    }while(choice < 0 || choice > calendar.getEvents().size() - 1);
+                    calendar.getEvents().get(choice).setHoliday(true);
                     break;
                 case "find": //Search for an event either by date or containing a specific string
                     System.out.println("Enter a keyword from the name or description of the event: ");

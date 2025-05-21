@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 public class Calendar {
 
-    public List<Event> events = new ArrayList<>();
+    private List<Event> events = new ArrayList<>();
     final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy");
     final LocalDate currentYear = LocalDate.now();
     //The calendar is a singleton since we only have one active calendar in the app at once
@@ -21,8 +21,11 @@ public class Calendar {
         return calendarInstance;
     }
 
-    public void setEvents(List<Event> events) {
+    public List<Event> getEvents() {
+        return events;
+    }
 
+    public void setEvents(List<Event> events) {
         this.events = events;
     }
 
@@ -297,133 +300,129 @@ public class Calendar {
         int day, month, start, end, i = 0;
         String info;
 
+        System.out.println("""
+                Choose what to change about the event.
+                -------------------------
+                date -> Change date\s
+                start -> Change start time\s
+                end -> Change end time\s
+                name -> Change name\s
+                desc -> Change description
+                """);
 
-        while (true) {
-            System.out.println("""
-                    Choose what to change about the event.
-                    -------------------------
-                    date -> Change date\s
-                    start -> Change start time\s
-                    end -> Change end time\s
-                    name -> Change name\s
-                    desc -> Change description
-                    """);
+        action = scanner.nextLine();
+        switch (action.toLowerCase()) {
+            case "date": //Change date
+                for (Event e : events) {
+                    i++;
+                    if (!e.equals(event))
+                        continue;
 
-            action = scanner.nextLine();
-            switch (action.toLowerCase()) {
-                case "date": //Change date
-                    for (Event e : events) {
-                        i++;
-                        if (!e.equals(event))
-                            continue;
-
-                        do {
-                            System.out.println("Enter the month of the event: ");
-                            while (!scanner.hasNextInt()) {
-                                System.out.println("Error, invalid number entered!");
-                                scanner.nextLine();
-                            }
-                            month = scanner.nextInt();
-                            System.out.println('\n');
-
-                        } while (month < 1 || month > 12);
-
-                        do {
-                            System.out.println("Enter the day of the event: ");
-                            while (!scanner.hasNextInt()) {
-                                System.out.println("Error, invalid number entered!");
-                                scanner.nextLine();
-                            }
-                            day = scanner.nextInt();
-                            System.out.println('\n');
-
-                        } while (day < 0 || day > Month.of(month).length(currentYear.isLeapYear()));
-
-                        if (findOverlap(e).isEmpty())
-                            e.setChosenDay(LocalDate.of(currentYear.getYear(), month, day));
-                        else
-                            System.out.println("Change not possible due to overlapping event/s!");
-                        break;
-                    }
-                    break;
-                case "start": //Change start time
-                    for (Event e : events) {
-                        i++;
-                        if (!e.equals(event))
-                            continue;
-
-                        do {
-                            System.out.println("Enter the starting hour of the event: ");
-                            while (!scanner.hasNextInt()) {
-                                System.out.println("Error, invalid number entered!");
-                                scanner.nextLine();
-                            }
-                            start = scanner.nextInt();
-                            System.out.println('\n');
-
-                        } while (start < 0 || start >= 24 || start > e.endTime.getHour());
-
-                        if (findOverlap(e).isEmpty())
-                            e.setStartTime(LocalTime.of(start, 0));
-                        else
-                            System.out.println("Change not possible due to overlapping event/s!");
-                        break;
-                    }
-                    break;
-                case "end": //Change end time
-                    for (Event e : events) {
-                        i++;
-                        if (!e.equals(event))
-                            continue;
-
-                        do {
-                            System.out.println("Enter the ending hour of the event: ");
-                            while (!scanner.hasNextInt()) {
-                                System.out.println("Error, invalid number entered!");
-                                scanner.nextLine();
-                            }
-                            end = scanner.nextInt();
-                            System.out.println('\n');
-
-                        } while (end < 0 || end >= 24 || end == e.startTime.getHour() || end < e.startTime.getHour());
-
-                        if (findOverlap(e).isEmpty())
-                            e.setEndTime(LocalTime.of(end, 0));
-                        else
-                            System.out.println("Change not possible due to overlapping event/s!");
-
-                        break;
-                    }
-                    break;
-                case "name"://Change name
-                    for (Event e : events) {
-                        i++;
-                        if (!e.equals(event))
-                            continue;
-                        System.out.println("Enter the name of the event: ");
-                        info = scanner.nextLine();
+                    do {
+                        System.out.println("Enter the month of the event: ");
+                        while (!scanner.hasNextInt()) {
+                            System.out.println("Error, invalid number entered!");
+                            scanner.nextLine();
+                        }
+                        month = scanner.nextInt();
                         System.out.println('\n');
 
-                        e.setName(info);
-                        break;
-                    }
-                    break;
-                case "desc"://Change description
-                    for (Event e : events) {
-                        i++;
-                        if (!e.equals(event))
-                            continue;
-                        System.out.println("Enter a description of the event: ");
-                        info = scanner.nextLine();
+                    } while (month < 1 || month > 12);
+
+                    do {
+                        System.out.println("Enter the day of the event: ");
+                        while (!scanner.hasNextInt()) {
+                            System.out.println("Error, invalid number entered!");
+                            scanner.nextLine();
+                        }
+                        day = scanner.nextInt();
                         System.out.println('\n');
 
-                        e.setDesc(info);
-                        break;
-                    }
+                    } while (day < 0 || day > Month.of(month).length(currentYear.isLeapYear()));
+
+                    if (findOverlap(e).isEmpty())
+                        e.setChosenDay(LocalDate.of(currentYear.getYear(), month, day));
+                    else
+                        System.out.println("Change not possible due to overlapping event/s!");
                     break;
-                default:
-                    System.out.println("Invalid command.");
-            }
+                }
+                break;
+            case "start": //Change start time
+                for (Event e : events) {
+                    i++;
+                    if (!e.equals(event))
+                        continue;
+
+                    do {
+                        System.out.println("Enter the starting hour of the event: ");
+                        while (!scanner.hasNextInt()) {
+                            System.out.println("Error, invalid number entered!");
+                            scanner.nextLine();
+                        }
+                        start = scanner.nextInt();
+                        System.out.println('\n');
+
+                    } while (start < 0 || start >= 24 || start > e.endTime.getHour());
+
+                    if (findOverlap(e).isEmpty())
+                        e.setStartTime(LocalTime.of(start, 0));
+                    else
+                        System.out.println("Change not possible due to overlapping event/s!");
+                    break;
+                }
+                break;
+            case "end": //Change end time
+                for (Event e : events) {
+                    i++;
+                    if (!e.equals(event))
+                        continue;
+
+                    do {
+                        System.out.println("Enter the ending hour of the event: ");
+                        while (!scanner.hasNextInt()) {
+                            System.out.println("Error, invalid number entered!");
+                            scanner.nextLine();
+                        }
+                        end = scanner.nextInt();
+                        System.out.println('\n');
+
+                    } while (end < 0 || end >= 24 || end == e.startTime.getHour() || end < e.startTime.getHour());
+
+                    if (findOverlap(e).isEmpty())
+                        e.setEndTime(LocalTime.of(end, 0));
+                    else
+                        System.out.println("Change not possible due to overlapping event/s!");
+
+                    break;
+                }
+                break;
+            case "name"://Change name
+                for (Event e : events) {
+                    i++;
+                    if (!e.equals(event))
+                        continue;
+                    System.out.println("Enter the name of the event: ");
+                    info = scanner.nextLine();
+                    e.setName(info);
+                    System.out.println("Name changed.");
+                    break;
+                }
+                break;
+            case "desc"://Change description
+                for (Event e : events) {
+                    i++;
+                    if (!e.equals(event))
+                        continue;
+                    System.out.println("Enter a description of the event: ");
+                    info = scanner.nextLine();
+
+                    e.setDesc(info);
+                    System.out.println("Description changed.");
+                    break;
+                }
+                break;
+            default:
+                System.out.println("Invalid command.");
         }
     }
 

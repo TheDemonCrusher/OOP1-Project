@@ -17,7 +17,7 @@ public class FileController {
     }
 
     public void readFile() {
-        calendar.events = readFileToArray();
+        calendar.setEvents(readFileToArray());
     }
 
     public List<Event> readFileToArray() {
@@ -65,7 +65,7 @@ public class FileController {
     }
 
     public void writeToTxt() {
-        if (calendar.events.isEmpty()) {
+        if (calendar.getEvents().isEmpty()) {
             Scanner scanner = new Scanner(System.in);
             System.out.println("You are about to write an empty calendar to a file, are you sure you want to continue?" +
                     "\n Write 'CONTINUE' to go on. Write anything else to go back.");
@@ -86,7 +86,7 @@ public class FileController {
             FileWriter myWriter = new FileWriter(wFile);
 
             //each event will be written on 1 row, every next element is spaced out, there's a - after the name and before the descriprion
-            for (Event e : calendar.events) {
+            for (Event e : calendar.getEvents()) {
                 myWriter.write(e.name + "-");
                 myWriter.write(e.getYear() + " ");
                 myWriter.write(e.getMonth() + " ");
@@ -107,7 +107,7 @@ public class FileController {
     }
 
     public void writeToFile() {
-        if (calendar.events.isEmpty()) {
+        if (calendar.getEvents().isEmpty()) {
             Scanner scanner = new Scanner(System.in);
             System.out.println("You are about to write an empty calendar to a file, are you sure you want to continue?" +
                     "\n Write 'CONTINUE' to go on. Write anything else to go back.");
@@ -139,7 +139,7 @@ public class FileController {
             FileWriter myWriter = new FileWriter(wFile);
 
             //each event will be written on 1 row, every next element is spaced out, there's a - after the name and before the descriprion
-            for (Event e : calendar.events) {
+            for (Event e : calendar.getEvents()) {
                 myWriter.write(e.name + "-");
                 myWriter.write(e.getYear() + " ");
                 myWriter.write(e.getMonth() + " ");
