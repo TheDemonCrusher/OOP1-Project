@@ -416,6 +416,8 @@ public class Calendar {
         }
     }
 
+
+
     public List<Event> findSlot() {
         if (events.isEmpty()) {
             System.out.println("No events in the schedule, of course you're free at that time!");
@@ -481,18 +483,15 @@ public class Calendar {
         FileController fileController = new FileController();
         List<Event> avaliableSlots = findSlot();
         List<Event> avaliableCombinedSlots = new ArrayList<>();
-        List<Event> result = new ArrayList<>();
         List<Event> fileEvents = fileController.readFileToArray();
         List<Event> overlaps = new ArrayList<>();
-        int day, month, hours;
+        int hours;
 
         if (avaliableSlots.isEmpty()) {
             System.out.println("No avaliable slots in the current calendar, no point in checking the file");
             return null;
         }
 
-        month = avaliableSlots.get(0).getMonth().getValue();
-        day = avaliableSlots.get(0).getDay();
         hours = avaliableSlots.get(0).endTime.getHour() - avaliableSlots.get(0).startTime.getHour();
 
         int currentHour = 8;
@@ -605,6 +604,12 @@ public class Calendar {
     }
 
     public void findEvents(String info) {
+        if(events.isEmpty())
+        {
+            System.out.println("The list of events is empty!");
+            return;
+        }
+
         List<Event> temp = new ArrayList<>();
         for (Event e : events) {
             if (e.name.toUpperCase().contains(info.toUpperCase()) || e.desc.toUpperCase().contains(info.toUpperCase()))
@@ -612,8 +617,7 @@ public class Calendar {
         }
         int size = temp.size();
         if (size > 0) {
-            Scanner scanner = new Scanner(System.in);
-            int i = 0, choice;
+            int i = 0;
             for (Event e : temp) {
                 i++;
                 e.ShowEvent();

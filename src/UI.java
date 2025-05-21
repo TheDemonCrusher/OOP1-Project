@@ -162,7 +162,7 @@ public class UI {
                     {
                         System.out.println("The avaliable slots are: \n");
                         for(Event e : results)
-                            e.ShowEvent();
+                            System.out.println(e.ShowEvent());
                     }
 
                     break;
