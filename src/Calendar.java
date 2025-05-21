@@ -126,20 +126,10 @@ public class Calendar {
             events.add(event);
             return true;
         }
-        boolean notBusy = true;
 
-
-        for (Event e : events) {
-            if (e.getMonth() == event.getMonth() && e.getDay() == event.getDay()) {
-                for (int i = event.startTime.getHour(); i < event.endTime.getHour(); i++) {
-                    if (i > e.startTime.getHour() && i < e.endTime.getHour()) {
-                        notBusy = false;
-                        break;
-                    }
-                }
-            }
-        }
-        if (notBusy) {
+        List<Event> overlaps = findOverlap(event);
+        if(overlaps.isEmpty())
+        {
             events.add(event);
             return true;
         }

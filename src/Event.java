@@ -70,7 +70,7 @@ final LocalDate currentYear = LocalDate.now();
     {
         Scanner scanner = new Scanner(System.in);
         String action;
-        int day, month, start, end, i = 0;
+        int day, month, start, end;
         String info;
 
         while(true) {
