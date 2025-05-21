@@ -3,17 +3,46 @@ import java.time.LocalTime;
 import java.time.Month;
 import java.util.Scanner;
 
+/**
+ * Клас, представящ събитие с информация за дата, време, описание и дали е празник.
+ */
 public class Event {
-String name;
-LocalTime startTime;
-LocalTime endTime;
-LocalDate chosenDay;
-String desc;
-boolean holiday;
-final LocalDate currentYear = LocalDate.now();
+    /**
+     * Име на събитието
+     */
+    String name;
+    /**
+     * Начален час на събитието
+     */
+    LocalTime startTime;
+    /**
+     * Краен час на събитието
+     */
+    LocalTime endTime;
+    /**
+     * Дата, на която ще се проведе събитието
+     */
+    LocalDate chosenDay;
+    /**
+     * Описание на събитието
+     */
+    String desc;
+    /**
+     * Дали събитието е празник
+     */
+    boolean holiday;
+    /**
+     * Текуща година за референция при промени по дата
+     */
+    final LocalDate currentYear = LocalDate.now();
 
-    public Event(Event e)
-    {
+    /**
+     * Копиращ конструктор.
+     * Създава нов обект Event чрез копиране на друг.
+     *
+     * @param e съществуващ обект Event
+     */
+    public Event(Event e) {
         startTime = e.startTime;
         endTime = e.endTime;
         name = e.name;
@@ -22,6 +51,16 @@ final LocalDate currentYear = LocalDate.now();
         holiday = e.holiday;
     }
 
+    /**
+     * Конструктор с параметри.
+     *
+     * @param name  име на събитието
+     * @param month месец на провеждане
+     * @param day   ден на провеждане
+     * @param start начален час (цяло число от 0 до 23)
+     * @param end   краен час (цяло число от 0 до 23)
+     * @param desc  описание на събитието
+     */
     public Event(String name, Month month, int day, int start, int end, String desc) {
         startTime = LocalTime.of(start, 0);
         endTime = LocalTime.of(end, 0);
@@ -31,23 +70,48 @@ final LocalDate currentYear = LocalDate.now();
         holiday = false;
     }
 
+    /**
+     * Задава дали събитието е празник.
+     *
+     * @param holiday true ако е празник, false в противен случай
+     */
     public void setHoliday(boolean holiday) {
         this.holiday = holiday;
     }
 
-    public int getYear(){
+    /**
+     * Връща годината на провеждане на събитието.
+     *
+     * @return година като цяло число
+     */
+    public int getYear() {
         return chosenDay.getYear();
     }
+
+    /**
+     * Връща месеца на събитието.
+     *
+     * @return месец от тип {@link Month}
+     */
     public Month getMonth() {
         return chosenDay.getMonth();
     }
 
+    /**
+     * Връща деня на събитието.
+     *
+     * @return ден от месеца
+     */
     public int getDay() {
         return chosenDay.getDayOfMonth();
     }
 
-    public String ShowEvent()
-    {
+    /**
+     * Извежда информация за събитието под формата на низ.
+     *
+     * @return форматирана информация за събитието
+     */
+    public String ShowEvent() {
         StringBuilder sb = new StringBuilder();
         sb.append("Event: ");
         sb.append(name);
@@ -66,14 +130,17 @@ final LocalDate currentYear = LocalDate.now();
         return sb.toString();
     }
 
-    public void change()
-    {
+    /**
+     * Метод за промяна на съществуващо събитие.
+     * Позволява редакция на дата, час, име и описание чрез конзолни команди.
+     */
+    public void change() {
         Scanner scanner = new Scanner(System.in);
         String action;
         int day, month, start, end;
         String info;
 
-        while(true) {
+        while (true) {
             System.out.println("""
                     Choose what to change about the event.
                     -------------------------
@@ -160,26 +227,56 @@ final LocalDate currentYear = LocalDate.now();
         }
     }
 
+    /**
+     * Задава името на събитието.
+     *
+     * @param name ново име
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Задава началния час на събитието.
+     *
+     * @param startTime нов начален час
+     */
     public void setStartTime(LocalTime startTime) {
         this.startTime = startTime;
     }
 
+    /**
+     * Задава крайния час на събитието.
+     *
+     * @param endTime нов краен час
+     */
     public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
     }
 
+    /**
+     * Задава нова дата за събитието.
+     *
+     * @param chosenDay нова дата
+     */
     public void setChosenDay(LocalDate chosenDay) {
         this.chosenDay = chosenDay;
     }
 
+    /**
+     * Задава описанието на събитието.
+     *
+     * @param desc ново описание
+     */
     public void setDesc(String desc) {
         this.desc = desc;
     }
 
+    /**
+     * Проверява дали събитието е маркирано като празник.
+     *
+     * @return true ако е празник, false в противен случай
+     */
     public boolean isHoliday() {
         return holiday;
     }
