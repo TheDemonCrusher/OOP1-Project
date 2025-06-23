@@ -1,3 +1,5 @@
+package Models;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Month;
@@ -14,25 +16,30 @@ import java.io.IOException;
  * Използва вътрешен екземпляр от {@link Calendar} за управление на събитията.
  */
 public class FileController {
-
     /**
      * Инстанция на класа {@link Calendar}, използвана за управление на събитията.
-     * Инициализира се чрез фабричния метод {@code Calendar.getInstance()}.
+     * Инициализира се чрез фабричния метод {@code Models.Calendar.getInstance()}.
      */
-    Calendar calendar = Calendar.getInstance();
+    private Calendar calendar = Calendar.getInstance();
+
+    private String lastSaved;
 
     /**
-     * Конструктор по подразбиране на класа {@code FileController}.
+     * Конструктор по подразбиране на класа {@code Models.FileController}.
      * Не извършва специфична инициализация, освен създаване на обекта.
      */
     public FileController() {
     }
 
+    public String getLastSaved() {
+        return lastSaved;
+    }
+
     /**
      * Чете събития от файл, избран от потребителя, и ги записва в календара.
      */
-    public void readFile() {
-        calendar.setEvents(readFileToArray());
+    public void readFile(String name) {
+        calendar.setEvents(readFileToArray(name));
     }
 
     /**
@@ -42,16 +49,8 @@ public class FileController {
      *
      * @return Списък със събития или {@code null}, ако файлът не е намерен
      */
-    public List<Event> readFileToArray() {
+    public List<Event> readFileToArray(String name) {
         try {
-            System.out.println("Enter the name of the text file you want to read from (without .txt at the end and without any dots)");
-            Scanner scanner = new Scanner(System.in);
-            String name = scanner.nextLine();
-            while (name.indexOf('.') != -1) {
-                System.out.println("No dots/file types allowed in the name!");
-                name = scanner.nextLine();
-            }
-
             File myObj = new File(name + ".txt");
             Scanner myReader = new Scanner(myObj);
             List<Event> events = new ArrayList<>();
@@ -60,17 +59,17 @@ public class FileController {
 
                 String line = myReader.nextLine();
                 String[] data = line.split("-");
-                e.name = data[0];
-                e.desc = data[2];
+                e.setName(data[0]);
+                e.setDesc(data[2]);
                 data = data[1].split(" ");
                 int year = Integer.parseInt(data[0]); //year
                 Month month = Month.valueOf(data[1]); // month
                 int day = Integer.parseInt(data[2]); //day
 
-                e.chosenDay = LocalDate.of(year, month, day);
+                e.setDate(LocalDate.of(year, month, day));
 
-                e.startTime = LocalTime.parse(data[3]);
-                e.endTime = LocalTime.parse(data[4]);
+                e.setStartTime(LocalTime.parse(data[3]));
+                e.setEndTime(LocalTime.parse(data[4]));
 
                 events.add(e);
             }
@@ -92,8 +91,9 @@ public class FileController {
      *
      * <p>Формат на записа: всяко събитие е на нов ред с полетата, разделени с „-“.</p>
      */
-    public void writeToTxt() {
+    public void writeToTxt(String name) {
         if (calendar.getEvents().isEmpty() || calendar.getEvents() == null) {
+
             Scanner scanner = new Scanner(System.in);
             System.out.println("You are about to write an empty calendar to a file, are you sure you want to continue?" +
                     "\n Write 'CONTINUE' to go on. Write anything else to go back.");
@@ -102,45 +102,33 @@ public class FileController {
                 return;
             else
             {
-                System.out.println("Enter the name of the text file you want to write to (without .txt at the end and without any dots)");
-                String path = scanner.nextLine();
-                while (path.indexOf('.') != -1) {
-                    System.out.println("No dots/file types allowed in the name!");
-                    path = scanner.nextLine();
-                }
-
                 try{
-                    File emptyFile = new File(path + ".txt");
+                    File emptyFile = new File(name + ".txt");
                     FileWriter empty = new FileWriter(emptyFile);
+                    System.out.println("File created successfully");
+                    this.lastSaved = name;
                 }catch(IOException e)
                 {
-                    System.out.println("An error occurred.");
+                    System.out.println("Error when writting to file: \" + e.getMessage()");
                     System.out.println(e.getMessage());
                 }
                 return;
             }
         }
         try {
-            System.out.println("Enter the name of the text file you want to write to (without .txt at the end and without any dots)");
-            Scanner scanner = new Scanner(System.in);
-            String path = scanner.nextLine();
-            while (path.indexOf('.') != -1) {
-                System.out.println("No dots/file types allowed in the name!");
-                path = scanner.nextLine();
-            }
-
-            File wFile = new File(path + ".txt");
+            File wFile = new File(name + ".txt");
             FileWriter myWriter = new FileWriter(wFile);
+            this.lastSaved = name;
 
             //each event will be written on 1 row, every next element is spaced out, there's a - after the name and before the descriprion
             for (Event e : calendar.getEvents()) {
-                myWriter.write(e.name + "-");
+                myWriter.write(e.getName() + "-");
                 myWriter.write(e.getYear() + " ");
                 myWriter.write(e.getMonth() + " ");
                 myWriter.write(e.getDay() + " ");
-                myWriter.write(e.startTime + " ");
-                myWriter.write(e.endTime + "-");
-                myWriter.write(e.desc);
+                myWriter.write(e.getStartTime() + " ");
+                myWriter.write(e.getEndTime() + "-");
+                myWriter.write(e.getDesc());
                 myWriter.write("\n");
             }
 
@@ -148,7 +136,7 @@ public class FileController {
             System.out.println("Successfully wrote to the file.");
 
         } catch (IOException e) {
-            System.out.println("An error occurred.");
+            System.out.println("Error when writting to file: \" + e.getMessage()");
             System.out.println(e.getMessage());
         }
     }
@@ -159,47 +147,20 @@ public class FileController {
      *
      * <p>Ако потребителят въведе „0“, се връща към главното меню.</p>
      */
-    public void writeToFile() {
-        if (calendar.getEvents().isEmpty()) {
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("You are about to write an empty calendar to a file, are you sure you want to continue?" +
-                    "\n Write 'CONTINUE' to go on. Write anything else to go back.");
-            String answer = scanner.nextLine();
-            if (!answer.equalsIgnoreCase("CONTINUE"))
-                return;
-        }
+    public void writeToFile(String name) {
         try {
-            System.out.println("Enter the name of the text file you want to write to, include the file type(Example -> .txt | .dat)[File name cannot contain 0]");
-            System.out.println("WARNING: This function will create a file with whatever extension you choose for it, meaning the file you create might not be compatible with the information!");
-            System.out.println("If you wish to return to the main menu at any time, please type '0' ");
-            Scanner scanner = new Scanner(System.in);
-            String path = scanner.nextLine();
-            if (path.equals("0")) {
-                UI ui = new UI();
-                ui.mainMenu();
-            }
-            while (path.indexOf('.') == -1) {
-                if (path.equals("0")) {
-                    UI ui = new UI();
-                    ui.mainMenu();
-                }
-                System.out.println("No file extension at the end!");
-                System.out.println("Enter the name of the text file you want to write to, include the file type( Example -> .txt | .dat)");
-                path = scanner.nextLine();
-            }
-
-            File wFile = new File(path);
+            File wFile = new File(name);
             FileWriter myWriter = new FileWriter(wFile);
 
             //each event will be written on 1 row, every next element is spaced out, there's a - after the name and before the descriprion
             for (Event e : calendar.getEvents()) {
-                myWriter.write(e.name + "-");
+                myWriter.write(e.getName() + "-");
                 myWriter.write(e.getYear() + " ");
                 myWriter.write(e.getMonth() + " ");
                 myWriter.write(e.getDay() + " ");
-                myWriter.write(e.startTime + " ");
-                myWriter.write(e.endTime + "-");
-                myWriter.write(e.desc);
+                myWriter.write(e.getStartTime() + " ");
+                myWriter.write(e.getEndTime() + "-");
+                myWriter.write(e.getDesc());
                 myWriter.write("\n");
             }
 
@@ -223,9 +184,10 @@ public class FileController {
      *
      * <p>Новите събития се визуализират едно по едно заедно с всички съществуващи припокриващи се.</p>
      */
-    public void mergeData() {
-        List<Event> newEvents = readFileToArray();
+    public void mergeData(String name) {
 
+        List<Event> newEvents = readFileToArray(name);
+        if (newEvents == null) return;
         for (Event e : newEvents) {
             System.out.println("Next event: \n");
             System.out.println(e.ShowEvent());
@@ -266,14 +228,34 @@ public class FileController {
                             calendar.book(e);
                             break;
                         case 2: //Move the old event/s
+                        {
                             for (Event ev : overlaps)
-                                calendar.change(ev);
+                            {
+                                ev.ShowEvent();
+                                System.out.println("What would you like to change for this event?");
+                                System.out.println("Valid choices: 'date', 'start', 'end'");
+                                String choice;
+                                do{
+                                    choice = scanner.nextLine();
+                                }while (!choice.equalsIgnoreCase("date") && !choice.equalsIgnoreCase("start") && !choice.equalsIgnoreCase("end"));
+
+                                calendar.change(ev, choice);
+                            }
+
                             repeat = !calendar.book(e);
                             if (repeat)
                                 System.out.println("You did not clear the schedule around the new event!");
+                        }
                             break;
                         case 3://Move the new event
-                            e.change();
+                            System.out.println("What would you like to change for the new event?");
+                            System.out.println("Valid choices: 'date', 'start', 'end'");
+                            String choice;
+                            do{
+                                choice = scanner.nextLine();
+                            }while (!choice.equalsIgnoreCase("date") && !choice.equalsIgnoreCase("start") && !choice.equalsIgnoreCase("end"));
+
+                            e.change(choice);
                             repeat = !calendar.book(e);
                             if (repeat)
                                 System.out.println("You did not choose a free time for the new event!");

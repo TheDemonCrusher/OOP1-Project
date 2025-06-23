@@ -1,10 +1,12 @@
+package Models;
+
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Класът Calendar представлява календар, който съхранява и управлява събития за дадена година.
+ * Класът Models.Calendar представлява календар, който съхранява и управлява събития за дадена година.
  * Използва се Singleton шаблон за гарантиране на една инстанция.
  */
 public class Calendar {
@@ -16,12 +18,12 @@ public class Calendar {
     /**
      * Форматиращ обект за работа с дати.
      */
-    final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy");
+    public final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy");
 
     /**
      * Текущата дата, използвана като база за текущата година.
      */
-    final LocalDate currentYear = LocalDate.now();
+    public final LocalDate currentYear = LocalDate.now();
 
     /**
      * Единствената инстанция на календара (Singleton).
@@ -36,8 +38,8 @@ public class Calendar {
     }
 
     /**
-     * Връща единствената инстанция на класа Calendar.
-     * @return инстанция на Calendar
+     * Връща единствената инстанция на класа Models.Calendar.
+     * @return инстанция на Models.Calendar
      */
     public static Calendar getInstance() {
         if (calendarInstance == null)
@@ -144,21 +146,21 @@ public class Calendar {
      * @return true ако събитието е успешно записано, иначе false
      */
     public boolean book(Event event) {
-        if (event.startTime.isAfter(event.endTime)) {
+        if (event.getStartTime().isAfter(event.getEndTime())) {
             Event day1 = new Event(event);
             Event day2 = new Event(event);
-            day1.name += " pt.1";
-            day2.name += " pt.2";
-            day1.endTime = LocalTime.of(23, 59);
+            day1.setName(day1.getName() + " pt.1");
+            day2.setName(day2.getName() + " pt.2");
+            day1.setEndTime(LocalTime.of(23, 59));
 
             if (event.getMonth().length(currentYear.isLeapYear()) > day1.getDay())
-                day2.chosenDay = day2.chosenDay.plusDays(1);
+                day2.setDate(day2.getDate().plusDays(1));
             else {
-                day2.chosenDay = day2.chosenDay.withDayOfMonth(1);
-                day2.chosenDay = day2.chosenDay.plusMonths(1);
+                day2.setDate(day2.getDate().withDayOfMonth(1));
+                day2.setDate(day2.getDate().plusMonths(1));
             }
 
-            day2.startTime = LocalTime.of(0, 0);
+            day2.setStartTime(LocalTime.of(0, 0));
 
             if (book(day1)) {
                 if (book(day2))
@@ -170,12 +172,14 @@ public class Calendar {
         }
         if (events.isEmpty()) {
             events.add(event);
+            System.out.println("Event added successfully");
             return true;
         }
 
         List<Event> overlaps = findOverlap(event, events);
         if (overlaps.isEmpty()) {
             events.add(event);
+            System.out.println("Event added successfully");
             return true;
         } else
             System.out.println("The event overlaps with other/s!");
@@ -186,77 +190,24 @@ public class Calendar {
      * Премахва събитие чрез въвеждане от потребителя.
      * Изисква потвърждение преди изтриване.
      */
-    public void unbook() {
+    public void unbook(LocalDate date, LocalTime startTime, LocalTime endTime) {
         Scanner scanner = new Scanner(System.in);
-        int month, day, start, end, i = 0;
+        int i = 0;
         String choice = "";
-
-        LocalDate date;
-        LocalTime startTime;
-        LocalTime endTime;
-
-        do {
-            System.out.println("Enter the month of the event: ");
-            while (!scanner.hasNextInt()) {
-                System.out.println("Error, invalid number entered!");
-                scanner.nextLine();
-            }
-            month = scanner.nextInt();
-            System.out.println('\n');
-
-        } while (month < 1 || month > 12);
-
-        do {
-            System.out.println("Enter the day of the event: ");
-            while (!scanner.hasNextInt()) {
-                System.out.println("Error, invalid number entered!");
-                scanner.nextLine();
-            }
-            day = scanner.nextInt();
-            System.out.println('\n');
-
-        } while (day < 0 || day > Month.of(month).length(currentYear.isLeapYear()));
-
-        do {
-            System.out.println("Enter the starting hour of the event: ");
-            while (!scanner.hasNextInt()) {
-                System.out.println("Error, invalid number entered!");
-                scanner.nextLine();
-            }
-            start = scanner.nextInt();
-            System.out.println('\n');
-
-        } while (start < 0 || start >= 24);
-
-        do {
-            System.out.println("Enter the ending hour of the event: ");
-            while (!scanner.hasNextInt()) {
-                System.out.println("Error, invalid number entered!");
-                scanner.nextLine();
-            }
-            end = scanner.nextInt();
-            System.out.println('\n');
-
-        } while (end < 0 || end >= 24 || end == start);
-
-        date = LocalDate.of(currentYear.getYear(), Month.of(month), day);
-        startTime = LocalTime.of(start, 0);
-        endTime = LocalTime.of(end, 0);
 
         for (Event e : events) {
             if (e.getMonth() == date.getMonth() && e.getDay() == date.getDayOfMonth()) {
-                if (e.startTime == startTime && e.endTime == endTime) {
+                if (e.getStartTime() == startTime && e.getEndTime() == endTime) {
                     i++;
                     System.out.println(e.ShowEvent());
                     System.out.println("Do you really want to delete this event?\n");
                     System.out.println("Type 'confirm' continue:\n");
 
                     choice = scanner.nextLine();
-                    choice = scanner.nextLine();
 
                     if (choice.equalsIgnoreCase("confirm")) {
                         removeEvent(e);
-                        System.out.println("Event has been removed.");
+                        System.out.println("Models.Event has been removed.");
                         return;
                     }
 
@@ -280,17 +231,17 @@ public class Calendar {
 
         for (Event e : events) {
             if (e.getMonth() == event.getMonth() && e.getDay() == event.getDay()) {
-                for (int i = event.startTime.getHour(); i <= event.endTime.getHour(); i++) {
-                    if (i != event.endTime.getHour() && i == e.startTime.getHour()) {
+                for (int i = event.getStartTime().getHour(); i <= event.getEndTime().getHour(); i++) {
+                    if (i != event.getEndTime().getHour() && i == e.getStartTime().getHour()) {
                         overlaps.add(e);
                         break;
                     }
-                    if (i == event.startTime.getHour()) {
-                        if (i > e.startTime.getHour() && i < e.endTime.getHour()) {
+                    if (i == event.getStartTime().getHour()) {
+                        if (i > e.getStartTime().getHour() && i < e.getEndTime().getHour()) {
                             overlaps.add(e);
                             break;
                         }
-                    } else if (i > e.startTime.getHour() && i <= e.endTime.getHour()) {
+                    } else if (i > e.getStartTime().getHour() && i <= e.getEndTime().getHour()) {
                         overlaps.add(e);
                         break;
                     }
@@ -303,35 +254,8 @@ public class Calendar {
     /**
      * Показва всички събития за избрана дата, въведена от потребителя.
      */
-    public void agenda() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Which day's schedule would you like to see?.\n");
-        int month, day, i = 0;
-        LocalDate date;
-        do {
-            System.out.println("Enter the month of the event: ");
-            while (!scanner.hasNextInt()) {
-                System.out.println("Error, invalid number entered!");
-                scanner.nextLine();
-            }
-            month = scanner.nextInt();
-            System.out.println('\n');
-
-        } while (month < 1 || month > 12);
-
-        do {
-            System.out.println("Enter the day of the event: ");
-            while (!scanner.hasNextInt()) {
-                System.out.println("Error, invalid number entered!");
-                scanner.nextLine();
-            }
-            day = scanner.nextInt();
-            System.out.println('\n');
-
-        } while (day < 0 || day > Month.of(month).length(currentYear.isLeapYear()));
-
-        date = LocalDate.of(currentYear.getYear(), Month.of(month), day);
-
+    public void agenda(LocalDate date) {
+        int i = 0;
         for (Event e : events) {
             if (e.getMonth() == date.getMonth() && e.getDay() == date.getDayOfMonth()) {
                 i++;
@@ -348,24 +272,21 @@ public class Calendar {
      * Промените се проверяват за припокриване с други събития.
      * @param event събитието, което ще бъде променено
      */
-    public void change(Event event) {
-
+    public void change(Event event, String action) {
+        System.out.println(event.ShowEvent());
+        System.out.println("Is this the event you'd like to edit?");
+        System.out.println("Type 'yes' to continue");
         Scanner scanner = new Scanner(System.in);
-        String action;
-        int day, month, start, end, i = 1;
-        String info;
+        String info = scanner.nextLine();
+        if(!info.equalsIgnoreCase("yes"))
+        {
+            System.out.println("Event wasn't changed");
+            return;
+        }
+        int day, month, start, end, i = 1, choice;
 
-        System.out.println("""
-                Choose what to change about the event.
-                -------------------------
-                date -> Change date\s
-                start -> Change start time\s
-                end -> Change end time\s
-                name -> Change name\s
-                desc -> Change description
-                """);
 
-        action = scanner.nextLine();
+
         List<Event> others = new ArrayList<>();
         switch (action.toLowerCase()) {
             case "date": //Change date
@@ -397,10 +318,10 @@ public class Calendar {
                 } while (day < 0 || day > Month.of(month).length(currentYear.isLeapYear()));
 
                 Event temp = new Event(event);
-                temp.setChosenDay(LocalDate.of(currentYear.getYear(), month, day));
+                temp.setDate(LocalDate.of(currentYear.getYear(), month, day));
                 if (findOverlap(temp, others).isEmpty()) {
-                    event.setChosenDay(LocalDate.of(currentYear.getYear(), month, day));
-                    System.out.println("Change was successful");
+                    event.setDate(LocalDate.of(currentYear.getYear(), month, day));
+                    System.out.println("Date changed");
                 } else
                     System.out.println("Change not possible due to overlapping event/s!");
             }
@@ -420,13 +341,13 @@ public class Calendar {
                     start = scanner.nextInt();
                     System.out.println('\n');
 
-                } while (start < 0 || start >= 24 || start > event.endTime.getHour());
+                } while (start < 0 || start >= 24 || start > event.getEndTime().getHour());
 
                 Event temp = new Event(event);
                 temp.setStartTime(LocalTime.of(start, 0));
                 if (findOverlap(temp, others).isEmpty()) {
                     event.setStartTime(LocalTime.of(start, 0));
-                    System.out.println("Change successful!");
+                    System.out.println("Start time changed!");
                 } else
                     System.out.println("Change not possible due to overlapping event/s!");
             }
@@ -446,13 +367,13 @@ public class Calendar {
                     end = scanner.nextInt();
                     System.out.println('\n');
 
-                } while (end < 0 || end >= 24 || end == event.startTime.getHour() || end < event.startTime.getHour());
+                } while (end < 0 || end >= 24 || end == event.getStartTime().getHour() || end < event.getStartTime().getHour());
 
                 Event temp = new Event(event);
                 temp.setEndTime(LocalTime.of(end, 0));
                 if (findOverlap(temp, others).isEmpty()) {
                     event.setEndTime(LocalTime.of(end, 0));
-                    System.out.println("Change successful!");
+                    System.out.println("End time changed!");
                 } else
                     System.out.println("Change not possible due to overlapping event/s!");
             }
@@ -498,57 +419,23 @@ public class Calendar {
      *     <li>Продължителност в часове (от 1 до 9)</li>
      * </ul>
      *
-     * @return Списък с {@code Event} обекти, представляващи свободни интервали,
+     * @return Списък с {@code Models.Event} обекти, представляващи свободни интервали,
      *         или {@code null}, ако няма събития в календара.
      */
-    public List<Event> findSlot() {
+    public List<Event> findSlot(int day, int month, int hours) {
         if (events.isEmpty()) {
             System.out.println("No events in the schedule, of course you're free at that time!");
             return null;
         }
-        Scanner scanner = new Scanner(System.in);
-        int hours, month, day;
 
-        do {
-            System.out.println("Enter the month of the event: ");
-            while (!scanner.hasNextInt()) {
-                System.out.println("Error, invalid number entered!");
-                scanner.nextLine();
-            }
-            month = scanner.nextInt();
-            System.out.println('\n');
-
-        } while (month < 1 || month > 12);
-
-        do {
-            System.out.println("Enter the day of the event: ");
-            while (!scanner.hasNextInt()) {
-                System.out.println("Error, invalid number entered!");
-                scanner.nextLine();
-            }
-            day = scanner.nextInt();
-            System.out.println('\n');
-
-        } while (day < 0 || day > Month.of(month).length(currentYear.isLeapYear()));
-
-        do {
-            System.out.println("Enter the duration of the event in hours: ");
-            while (!scanner.hasNextInt()) {
-                System.out.println("Meeting duration must be between 1-9 hours");
-                scanner.nextLine();
-            }
-            hours = scanner.nextInt();
-            System.out.println('\n');
-
-        } while (hours < 0 || hours > 9);
-
-        List<Event> overlaps = new ArrayList<>();
+        List<Event> overlaps;
         List<Event> avaliableSlots = new ArrayList<>();
 
         int currentHour = 8;
         while (currentHour <= 17 - hours) {
             for (int i = 0; i < 17 - hours; i++) {
                 Event event = new Event("Slot", Month.of(month), day, currentHour, currentHour + hours, "empty slot");
+
                 overlaps = findOverlap(event, events);
                 if (overlaps.isEmpty())
                     avaliableSlots.add(event);
@@ -559,6 +446,8 @@ public class Calendar {
             }
         }
 
+        if(avaliableSlots.isEmpty())
+            System.out.println("There are no available slots at the chosen time\n");
         return avaliableSlots;
     }
     /**
@@ -568,40 +457,39 @@ public class Calendar {
      *
      * <p>Подходящо за намиране на общо време за среща между потребители.</p>
      *
-     * @return Списък от {@code Event} обекти с валидни интервали, съвпадащи и с календара,
+     * @return Списък от {@code Models.Event} обекти с валидни интервали, съвпадащи и с календара,
      *         и с външния източник; или {@code null}, ако няма свободни интервали.
      */
-    public List<Event> findSlotWith() {
+    public List<Event> findSlotWith(int day, int month, int hours, String name) {
         FileController fileController = new FileController();
-        List<Event> avaliableSlots = findSlot();
+        List<Event> avaliableSlots = findSlot(day, month, hours);
         List<Event> avaliableCombinedSlots = new ArrayList<>();
-        List<Event> fileEvents = fileController.readFileToArray();
+        List<Event> fileEvents = fileController.readFileToArray(name);
         List<Event> overlaps = new ArrayList<>();
-        int hours;
 
         if (avaliableSlots.isEmpty()) {
             System.out.println("No avaliable slots in the current calendar, no point in checking the file");
             return null;
         }
 
-        hours = avaliableSlots.get(0).endTime.getHour() - avaliableSlots.get(0).startTime.getHour();
+        hours = avaliableSlots.get(0).getEndTime().getHour() - avaliableSlots.get(0).getStartTime().getHour();
 
         int currentHour = 8;
         for (Event event : avaliableSlots) { //only check through the avaliable slots in the calendar since they need to match anyway
 
             for (Event e : fileEvents) {
                 if (e.getMonth() == event.getMonth() && e.getDay() == event.getDay()) {
-                    for (int j = event.startTime.getHour(); j <= event.endTime.getHour(); j++) {
-                        if (j != event.endTime.getHour() && j == e.startTime.getHour()) {
+                    for (int j = event.getStartTime().getHour(); j <= event.getEndTime().getHour(); j++) {
+                        if (j != event.getEndTime().getHour() && j == e.getStartTime().getHour()) {
                             overlaps.add(e);
                             break;
                         }
-                        if (j == event.startTime.getHour()) {
-                            if (j > e.startTime.getHour() && j < e.endTime.getHour()) {
+                        if (j == event.getStartTime().getHour()) {
+                            if (j > e.getStartTime().getHour() && j < e.getEndTime().getHour()) {
                                 overlaps.add(e);
                                 break;
                             }
-                        } else if (j > e.startTime.getHour() && j <= e.endTime.getHour()) {
+                        } else if (j > e.getStartTime().getHour() && j <= e.getEndTime().getHour()) {
                             overlaps.add(e);
                             break;
                         }
@@ -628,46 +516,7 @@ public class Calendar {
      * <p>Извежда на екрана списък с обекти от тип {@code DayBusyness},
      * съдържащи дата и общ брой заети часове в рамките на този ден.</p>
      */
-    public void showBusyDays() {
-        Scanner scanner = new Scanner(System.in);
-        int day, month;
-        LocalDate from = LocalDate.of(1, 1, 1);
-        LocalDate to = LocalDate.of(1, 1, 1);
-
-        for (int i = 0; i < 2; i++) {
-            if (i == 0)
-                System.out.println("Enter the begining of the range for busy days (Month and day)\n");
-            else
-                System.out.println("Enter the end of the range for busy days (Month and day)\n");
-
-            do {
-                System.out.println("Enter the month of the event: ");
-                while (!scanner.hasNextInt()) {
-                    System.out.println("Error, invalid number entered!");
-                    scanner.nextLine();
-                }
-                month = scanner.nextInt();
-                System.out.println('\n');
-
-            } while (month < 1 || month > 12);
-
-            do {
-                System.out.println("Enter the day of the event: ");
-                while (!scanner.hasNextInt()) {
-                    System.out.println("Error, invalid number entered!");
-                    scanner.nextLine();
-                }
-                day = scanner.nextInt();
-                System.out.println('\n');
-
-            } while (day < 0 || day > Month.of(month).length(currentYear.isLeapYear()));
-
-            if (i == 0)
-                from = LocalDate.of(currentYear.getYear(), month, day);
-            else
-                to = LocalDate.of(currentYear.getYear(), month, day);
-        }
-
+    public void showBusyDays(LocalDate from, LocalDate to) {
         List<DayBusyness> results = busyDays(from, to);
         results.forEach(System.out::println);
     }
@@ -693,10 +542,10 @@ public class Calendar {
         // Group events by day and calculate total hours per day
         Map<LocalDate, Double> dayHoursMap = events.stream()
                 .filter(e -> !e.isHoliday()) // Optional: exclude holidays
-                .filter(e -> !e.chosenDay.isBefore(from) && !e.chosenDay.isAfter(to))
+                .filter(e -> !e.getDate().isBefore(from) && !e.getDate().isAfter(to))
                 .collect(Collectors.groupingBy(
-                        e -> e.chosenDay,
-                        Collectors.summingDouble(e -> Duration.between(e.startTime, e.endTime).toHours())
+                        Event::getDate,
+                        Collectors.summingDouble(e -> Duration.between(e.getStartTime(), e.getEndTime()).toHours())
                 ));
 
         // Convert to sortable list
@@ -742,7 +591,7 @@ public class Calendar {
 
         List<Event> temp = new ArrayList<>();
         for (Event e : events) {
-            if (e.name.toUpperCase().contains(info.toUpperCase()) || e.desc.toUpperCase().contains(info.toUpperCase()))
+            if (e.getName().toUpperCase().contains(info.toUpperCase()) || e.getDesc().toUpperCase().contains(info.toUpperCase()))
                 temp.add(e);
         }
         int size = temp.size();

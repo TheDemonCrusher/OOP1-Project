@@ -1,268 +1,134 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import Commands.*;
+import Interfaces.Command;
+import Interfaces.FileCommand;
+import Models.Calendar;
+import Models.FileController;
+
+import java.util.*;
 
 /**
- * Класът UI отговаря за всички меню функции на приложението.
- * Той управлява основното меню, менюто за файлови операции и менюто за събития.
- * Използва Scanner за въвеждане на команди от потребителя.
+ * Класът UI управлява потребителския интерфейс на приложението.
+ * Той обработва въвеждането на команди от потребителя,
+ * съхранява наличните команди и файлови команди и ги изпълнява.
+ * <p>
+ * Поддържа основен цикъл за въвеждане на команди и извежда съответните съобщения и резултати.
+ * Предоставя възможност за изход с опция за записване на текущото състояние на календара.
+ * </p>
  */
 public class UI {
 
-    private String action;
-    /**
-     * Конструктор по подразбиране на класа UI.
-     */
-    public UI(){}
+    private Map<String, Command> commands;
+    private Map<String, FileCommand> fileCommands;
+    private FileController fileController = new FileController();
+    private Calendar calendar = Calendar.getInstance();
+    boolean exit = false;
 
     /**
-     * Основно меню на приложението.
-     * Показва опциите за избор на действие (файлови операции, събития, помощ или изход)
-     * и стартира съответните подменюта или функции според избора на потребителя.
-     * Програмата продължава да работи, докато потребителят не избере изход.
+     * Създава нов обект UI и инициализира картите с наличните команди и файлови команди.
+     * Регистрира всички поддържани команди, които потребителят може да използва.
      */
-    public void mainMenu()
-    {
-        Scanner scanner = new Scanner(System.in);
+    public UI() {
+        commands = new HashMap<>();
+        fileCommands = new HashMap<>();
 
-        while(true) {
-            System.out.println("""
-                    ---------Main Menu---------\s
-                    Please choose an action type. (type help to view commands)\s
-                    -------------------------\s
-                    Base commands: \s
-                    files - File function access (Write to/Read from file | Open/Close file)\s
-                    events - Event function access (Add/Remove/Find/Modify events)\s
-                    help - Need help with commands?\s
-                    Exit\s
-                    """);
+        commands.put("agenda", new Agenda());
+        commands.put("book", new Book());
+        commands.put("change", new Change());
+        commands.put("find", new Find());
+        commands.put("findslot", new FindSlot());
+        commands.put("findslotwith", new FindSlotWith());
+        commands.put("help", new Help());
+        commands.put("showall", new ShowAll());
+        commands.put("showbusy", new ShowBusy());
+        commands.put("unbook", new Unbook());
 
-            action = scanner.nextLine();
-            switch (action.toLowerCase()) {
-                case "exit": //Exit when user input is = 0
-                    System.exit(0);
-                case "files": //Basic file actions - save/save as
-                    fileMenu();
-                    break;
-                case "events": //Modifying data - book/remove/find
-                    bookingsMenu();
-                    break;
-                case "help"://Info for all commands
-                    help();
-                    break;
-                default:
-                    System.out.println("Invalid command!");
-            }
-        }
+        fileCommands.put("merge", new Merge());
+        fileCommands.put("read", new Read());
+        fileCommands.put("saveas", new SaveAs());
+        fileCommands.put("write", new Write());
     }
 
     /**
-     * Меню за файлови операции.
-     * Позволява на потребителя да избира между записване, четене, запазване с друго име,
-     * сливане на календари или връщане към основното меню.
-     * Всяка опция задейства съответния метод от класа FileController.
-     * При избор "exit" приложението се затваря.
+     * Стартира основния цикъл на потребителския интерфейс.
+     * Изчаква въвеждане на команди от потребителя, обработва ги и извежда резултатите.
+     * Позволява изход чрез команда "exit" с възможност за запазване на календара.
      */
-    public void fileMenu()
-    {
+    public void mainLoop() {
         Scanner scanner = new Scanner(System.in);
-        FileController fileController = new FileController();
-        while(true) {
-            System.out.println("""
-                    Please choose an action.
-                    -------------------------
-                    menu -> Return to the main menu\s
-                    write -> Save the current calendar to a .txt file\s
-                    read -> Read a new calendar from a .txt file\s
-                    saveas -> Save as a custom file format (May cause errors if the type is incompatible, use with caution)\s
-                    merge -> Merge the calendar with a file\s
-                    Exit
-                    """);
+        System.out.println("Please enter a command!");
+        System.out.println("[Type 'help' for a list of commands.]");
 
-            action = scanner.nextLine();
-            //All actions must lead back to the main menu at the end!
-            switch (action.toLowerCase()) {
-                case "menu": //Return to main menu
-                    return;
-                case "write": //Write the calendar data to a text file ||
-                    fileController.writeToTxt();
-                    break;
-                case "read": //Override the calendar with a text file
-                    fileController.readFile();
-                    break;
-                case "saveas"://Save the calendar as a custom file
-                    fileController.writeToFile();
-                    break;
-                case "merge"://Merge the data from a file with the current calendar data
-                    fileController.mergeData();
-                    break;
-                case "exit":
-                    System.exit(0);
-                default:
-                    System.out.println("Number out of range! Please choose a valid option.");
-            }
-        }
-    }
+        while (!exit) {
+            System.out.print("> ");
+            String inputLine = scanner.nextLine();
 
-    /**
-     * Меню за управление на събития.
-     * Потребителят може да добавя, премахва, редактира събития, да маркира празници,
-     * търси събития или свободни слотове, показва всички или конкретни събития,
-     * както и да излезе от приложението.
-     * След всяко действие менюто се показва отново, докато не бъде избрана опция за изход или връщане към основното меню.
-     */
-    public void bookingsMenu()
-    {
-        Scanner scanner = new Scanner(System.in);
-        Calendar calendar = Calendar.getInstance();
-        String info;
-        int choice = 0;
-        List<Event> results = new ArrayList<>();
-        while(true) {
-            System.out.println("""
-                    Please choose an action.
-                    -------------------------
-                    menu -> Return to main menu\s
-                    book -> Add new event to the calendar \s
-                    unbook -> Remove an event\s
-                    change -> Edit an event\s
-                    holiday -> Mark a day as a holiday\s
-                    find -> Search for events\s
-                    findslot -> Search for free space in your schedule\s
-                    findslotwith -> Search for an empty space in this schedule and a file schedule\s
-                    showall -> Show all events in the schedule\s
-                    showbusy -> Show busy days in range\s
-                    showdaily -> Show all events for the chosen day\s
-                    Exit\s
-                    """);
-
-            action = scanner.nextLine();
-            //All actions must lead back to the main menu at the end!
-            switch (action.toLowerCase()) {
-                case "menu": //Return to main menu
-                    return;
-                case "book": //Add a new event
-                    if(calendar.book(calendar.createEvent()))
-                        System.out.println("Successfully added event!");
-                    else
-                        System.out.println("Event could not be added!");
-                    break;
-                case "unbook": //Remove an event on given date & time
-                    calendar.unbook();
-                    break;
-                case "change": //Edit a single value of a chosen event
-
-                    calendar.printEvents();
-                    System.out.println("Write the index of the event you'd like to change");
-                    do{
-                        while(!scanner.hasNextInt()){
-                            System.out.println("Error, invalid number entered!");
-                            scanner.nextLine();
-                        }
-                        choice = scanner.nextInt();
-                    }while(choice < 0 || choice > calendar.getEvents().size() - 1);
-
-                    calendar.change(calendar.getEvents().get(choice));
-                    break;
-                case "holiday": //Mark a day as a holiday
-                    calendar.printEvents();
-                    System.out.println("Write the index of the event you'd like to mark as a holiday");
-                    do{
-                        while(!scanner.hasNextInt()){
-                            System.out.println("Error, invalid number entered!");
-                            scanner.nextLine();
-                        }
-                        choice = scanner.nextInt();
-                    }while(choice < 0 || choice > calendar.getEvents().size() - 1);
-                    calendar.getEvents().get(choice).setHoliday(true);
-                    break;
-                case "find": //Search for an event either by date or containing a specific string
-                    System.out.println("Enter a keyword from the name or description of the event: ");
-                    info = scanner.nextLine();
-                    System.out.println('\n');
-                    calendar.findEvents(info);
-                    break;
-                case "findslot": //Search for an empty space in this schedule
-                    results.clear();
-                    results = calendar.findSlot();
-                    if(!results.isEmpty())
-                    {
-                        System.out.println("The avaliable slots are: \n");
-                        for(Event e : results)
-                            System.out.println(e.ShowEvent());
+            if (inputLine.trim().equalsIgnoreCase("exit")) {
+                String save = fileController.getLastSaved();// Обработка на изхода с потвърждение
+                if (save != null && !save.isEmpty()) {
+                    System.out.print("Write 'yes' if you would you like to save the calendar to the last .txt file you wrote to before exiting?");
+                    System.out.print("( " + save + ".txt )\n");
+                    String answer = scanner.nextLine();
+                    if (answer.equalsIgnoreCase("yes")) {
+                        FileCommand fileCommand = fileCommands.get("write");
+                        fileCommand.execute(fileController, new String[]{"write", save});
                     }
-
-                    break;
-                case "findslotwith"://Search for an empty space in this schedule and a file schedule
-                    results.clear();
-                    results = calendar.findSlotWith();
-                    if(!results.isEmpty())
-                    {
-                        System.out.println("These slots are both avaliable in the calendar and the file: \n");
-                        for(Event e : results)
-                            System.out.println(e.ShowEvent());
-                    }
-                    break;
-                case "showall": //Show all events in the schedule
-                    calendar.printEvents();
-                    break;
-                case "showbusy": //Show busy days in range
-                    calendar.showBusyDays();
-                    break;
-                case "showdaily"://Show all events for the chosen day
-                    calendar.agenda();
-                    break;
-                case "exit": //Exit when user input is = 0
-                    System.exit(0);
-                default:
-                    System.out.println("Invalid command!");
+                    exit = true;
+                } else {
+                    System.out.print("Calendar hasn't been saved to a .txt file before, are you sure you want to exit?");
+                    System.out.print("Write 'confirm' to exit.\n");
+                    String answer = scanner.nextLine();
+                    if (answer.equalsIgnoreCase("confirm"))
+                        exit = true;
+                }
+                continue;
             }
+
+            handleCommand(inputLine);
         }
+
+        scanner.close();
+        System.out.println("Exiting...");
     }
 
     /**
-     * Помощно меню с описание на всички команди и техните функции.
-     * Показва инструкции за работа с основното меню, файловото меню и менюто за събития.
-     * Изчаква натискане на клавиш от потребителя, след което се връща към основното меню.
+     * Обработва въведена от потребителя команда.
+     * Определя дали командата е файлов тип или обикновена, и съответно я изпълнява.
+     * При грешки в изпълнението извежда подходящи съобщения.
+     *
+     * @param inputLine Входният низ с командата и аргументите
      */
-    public void help()
-    {
-        System.out.println("\n=== HELP MENU ===");
-        System.out.println("Commands are organized by their respective menus.\n");
+    private void handleCommand(String inputLine) {
+        String[] parts = inputLine.trim().split("\\s+");
+        if (parts.length == 0 || parts[0].isEmpty()) {
+            return; // Игнорира празни редове
+        }
 
-        System.out.println("=== MAIN MENU (Access all functions from here) ===");
-        System.out.println("file -> File functions - Save/load calendar data");
-        System.out.println("events -> Event management - Book/edit/remove events");
-        System.out.println("help -> This help menu");
-        System.out.println("exit -> Exit the application\n");
+        String commandName = parts[0].toLowerCase();
+        FileCommand fCommand = fileCommands.get(commandName);
+        if (fCommand != null) {
+            try {
+                fCommand.execute(fileController, parts); // Изпълнява командата
+            } catch (IllegalArgumentException | IllegalStateException e) {
+                System.out.println("Error: " + e.getMessage());
+            } catch (Exception e) {
+                System.out.println("Unexpected error: " + e.getMessage());
+            }
+        } else {
+            Command command = commands.get(commandName); // Взема командата от регистрираната карта
 
-        System.out.println("=== FILE MENU (Press 1 in Main Menu) ===");
-        System.out.println("write -> Save calendar - Save current calendar to .txt file | expects the name of the file without its extension");
-        System.out.println("save -> Load calendar - Replace current calendar with file contents | expects the name of the file without its extension");
-        System.out.println("saveas -> Save as custom format - Export to any file format (advanced) | lets the user choose the name and extension of the file");
-        System.out.println("merge -> Merge calendars - Combine current calendar with file contents | merges calendars with chosen .txt file by name");
-        System.out.println("menu -> Return to main menu\n");
-
-        System.out.println("=== EVENT MENU (Press 2 in Main Menu) ===");
-        System.out.println("book -> Book event - Schedule a new event | expects manual input for each value");
-        System.out.println("unbook -> Remove event - Delete an existing event | expects manual input for the exact datetime of the event");
-        System.out.println("change -> Edit event - Modify event details | user chooses what to change and what value to asign");
-        System.out.println("holiday -> Mark holiday - Flag an event as a holiday | event is chosen by user");
-        System.out.println("find -> Search events - Find events by keyword | expects keyword as input by user");
-        System.out.println("findslot -> Find free slots - Check available meeting times | expects information about the slot");
-        System.out.println("findslotwith -> Combined free slots - Find times free in both calendar and file | same as findslot but also searches through a file");
-        System.out.println("showall -> Show all events - Display complete schedule | no input expected");
-        System.out.println("showbusy -> Busy days - See which days have most events | expects range of time");
-        System.out.println("showdaily -> Daily agenda - View schedule for specific day | expects a day as input");
-        System.out.println("menu -> Return to main menu\n");
-
-        System.out.println("=== USAGE TIPS ===");
-        System.out.println("- Dates/times must be entered as numbers (e.g., month '6' for June)");
-        System.out.println("- Free slot finder shows times between 8:00-17:00 on workdays only");
-        System.out.println("- When merging calendars, you'll be prompted to resolve conflicts");
-        System.out.println("- Holidays are marked separately from regular events\n");
-
-        System.out.println("Press any key to return...");
-        new Scanner(System.in).nextLine();
+            if (command != null) {
+                try {
+                    if (commandName.equalsIgnoreCase("find"))
+                        parts = inputLine.split(" ", 2);
+                    command.execute(calendar, parts); // Изпълнява командата
+                } catch (IllegalArgumentException | IllegalStateException e) {
+                    System.out.println("Error: " + e.getMessage());
+                } catch (Exception e) {
+                    System.out.println("Unexpected error: " + e.getMessage());
+                }
+            } else {
+                System.out.println("Unknown command: '" + commandName + "'. Feel free to use 'help' to check all valid commands.");
+            }
+        }
     }
 }
