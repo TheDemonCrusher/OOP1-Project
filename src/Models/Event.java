@@ -1,5 +1,6 @@
 package Models;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Month;
@@ -57,17 +58,16 @@ public class Event {
      * Конструктор с параметри.
      *
      * @param name  име на събитието
-     * @param month месец на провеждане
-     * @param day   ден на провеждане
+     * @param date  дата на провеждане
      * @param start начален час (цяло число от 0 до 23)
      * @param end   краен час (цяло число от 0 до 23)
      * @param desc  описание на събитието
      */
-    public Event(String name, Month month, int day, int start, int end, String desc) {
-        startTime = LocalTime.of(start, 0);
-        endTime = LocalTime.of(end, 0);
+    public Event(String name, LocalDate date, LocalTime start, LocalTime end, String desc) {
+        startTime = start;
+        endTime = end;
         this.name = name;
-        chosenDate = LocalDate.of(2025, month, day);
+        chosenDate = date;
         this.desc = desc;
         holiday = false;
     }
@@ -102,63 +102,73 @@ public class Event {
      */
     public void change(String action) {
         Scanner scanner = new Scanner(System.in);
-        int day, month, start, end;
+
+        LocalDate date = null;
+        LocalTime start = null, end = null;
+        boolean valid;
+
         switch (action.toLowerCase()) {
             case "date": //Change the date
                 do {
-                    System.out.println("Enter the month of the event: ");
-                    while (!scanner.hasNextInt()) {
-                        System.out.println("Error, invalid number entered!");
-                        scanner.nextLine();
+                    valid = true;
+                    System.out.println("Enter the date of the event: [dd/mm]");
+                    String[] line = scanner.nextLine().split("/");
+                    if (line.length != 2)
+                        valid = false;
+                    else {
+                        try {
+                            date = LocalDate.of(currentYear.getYear(), Integer.parseInt(line[1]), Integer.parseInt(line[0]));
+                        } catch (NumberFormatException | DateTimeException e) {
+                            throw new IllegalArgumentException("Month and day must be valid numbers and represent a real date");
+                        }
                     }
-                    month = scanner.nextInt();
                     System.out.println('\n');
+                } while (!valid);
 
-                } while (month < 1 || month > 12);
-
-                do {
-                    System.out.println("Enter the day of the event: ");
-                    while (!scanner.hasNextInt()) {
-                        System.out.println("Error, invalid number entered!");
-                        scanner.nextLine();
-                    }
-                    day = scanner.nextInt();
-                    System.out.println('\n');
-
-                } while (day < 0 || day > Month.of(month).length(currentYear.isLeapYear()));
-
-                setDate(LocalDate.of(currentYear.getYear(), month, day));
+                setDate(date);
                 System.out.println("Date changed");
 
                 break;
-            case "start": //Change the starting hour
+            case "time": //Change the starting hour
                 do {
-                    System.out.println("Enter the starting hour of the event: ");
-                    while (!scanner.hasNextInt()) {
-                        System.out.println("Error, invalid number entered!");
-                        scanner.nextLine();
+                    valid = true;
+                    System.out.println("Enter the starting hour of the event: [hh:mm]");
+                    String[] line = scanner.nextLine().split("/");
+                    if (line.length != 2)
+                        valid = false;
+                    else {
+                        try {
+                            start = LocalTime.of(Integer.parseInt(line[0]), Integer.parseInt(line[1]));
+                        } catch (NumberFormatException | DateTimeException e) {
+                            throw new IllegalArgumentException("Hours and minutes must be valid numbers and represent a real time");
+                        }
+                        if (start == null)
+                            valid = false;
                     }
-                    start = scanner.nextInt();
                     System.out.println('\n');
 
-                } while (start < 0 || start >= 24 || start > endTime.getHour());
-
-                setStartTime(LocalTime.of(start, 0));
+                } while (!valid);
+                setStartTime(start);
                 System.out.println("Start time changed!");
-                break;
-            case "end": //Change the ending hour
                 do {
-                    System.out.println("Enter the ending hour of the event: ");
-                    while (!scanner.hasNextInt()) {
-                        System.out.println("Error, invalid number entered!");
-                        scanner.nextLine();
+                    valid = true;
+                    System.out.println("Enter the ending hour of the event: [hh:mm]");
+                    String[] line = scanner.nextLine().split("/");
+                    if (line.length != 2)
+                        valid = false;
+                    else {
+                        try {
+                            end = LocalTime.of(Integer.parseInt(line[0]), Integer.parseInt(line[1]));
+                        } catch (NumberFormatException | DateTimeException e) {
+                            throw new IllegalArgumentException("Hours and minutes must be valid numbers and represent a real time");
+                        }
+                        if (end == null)
+                            valid = false;
                     }
-                    end = scanner.nextInt();
+
                     System.out.println('\n');
-
-                } while (end < 0 || end >= 24 || end == startTime.getHour() || end < startTime.getHour());
-
-                setEndTime(LocalTime.of(end, 0));
+                } while (!valid);
+                setEndTime(end);
                 System.out.println("End time changed!");
                 break;
             default:
@@ -182,7 +192,7 @@ public class Event {
         return desc;
     }
 
-    public LocalDate getDate(){
+    public LocalDate getDate() {
         return chosenDate;
     }
 
@@ -256,23 +266,5 @@ public class Event {
      */
     public void setDesc(String desc) {
         this.desc = desc;
-    }
-
-    /**
-     * Задава дали събитието е празник.
-     *
-     * @param holiday true ако е празник, false в противен случай
-     */
-    public void setHoliday(boolean holiday) {
-        this.holiday = holiday;
-    }
-
-    /**
-     * Проверява дали събитието е маркирано като празник.
-     *
-     * @return true ако е празник, false в противен случай
-     */
-    public boolean isHoliday() {
-        return holiday;
     }
 }

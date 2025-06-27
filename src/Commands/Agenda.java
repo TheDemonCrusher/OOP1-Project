@@ -3,7 +3,9 @@ package Commands;
 import Interfaces.Command;
 import Models.Calendar;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 /**
  * Команда за показване на дневния график (агенда) за конкретна дата.
@@ -34,19 +36,17 @@ public class Agenda implements Command {
         if (args.length != 2)
             throw new IllegalArgumentException("Agenda takes 1 argument! (Agenda <date>) [date format: dd/mm]");
 
-        int day, month;
         LocalDate date;
-        String[] input = args[1].split("/");
-        if (input.length != 2)
-            throw new IllegalArgumentException("fromDate must consist of a day and month separated by /");
-        try {
-            day = Integer.parseInt(input[0]);
-            month = Integer.parseInt(input[1]);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid first argument! date isn't written in numbers!");
-        }
 
-        date = LocalDate.of(calendar.currentYear.getYear(), month, day);
+        String[] input = args[1].split("/");
+
+        if (input.length != 2)
+            throw new IllegalArgumentException("Date must consist of a day and month separated by '/'");
+        try {
+            date = LocalDate.of(calendar.currentYear.getYear(), Integer.parseInt(input[1]), Integer.parseInt(input[0]));
+        } catch (NumberFormatException | DateTimeException e) {
+            throw new IllegalArgumentException("Month and day must be valid numbers and represent a real date");
+        }
         calendar.agenda(date);
     }
 }

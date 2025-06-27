@@ -3,9 +3,7 @@ package Models;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.FileNotFoundException;
@@ -21,8 +19,10 @@ public class FileController {
      * Инициализира се чрез фабричния метод {@code Models.Calendar.getInstance()}.
      */
     private Calendar calendar = Calendar.getInstance();
+    private Holidays holidays = Holidays.getInstance();
 
     private String lastSaved;
+    private final String holidayFile = "Holidays.txt";
 
     /**
      * Конструктор по подразбиране на класа {@code Models.FileController}.
@@ -54,8 +54,9 @@ public class FileController {
             File myObj = new File(name + ".txt");
             Scanner myReader = new Scanner(myObj);
             List<Event> events = new ArrayList<>();
+            LocalTime base = LocalTime.of(0, 0);
             while (myReader.hasNextLine()) {
-                Event e = new Event("", Month.JANUARY, 1, 0, 0, "");
+                Event e = new Event("", LocalDate.of(calendar.currentYear.getYear(),1, 1), base, base, "");
 
                 String line = myReader.nextLine();
                 String[] data = line.split("-");
@@ -249,11 +250,11 @@ public class FileController {
                             break;
                         case 3://Move the new event
                             System.out.println("What would you like to change for the new event?");
-                            System.out.println("Valid choices: 'date', 'start', 'end'");
+                            System.out.println("Valid choices: 'date', 'time'");
                             String choice;
                             do{
                                 choice = scanner.nextLine();
-                            }while (!choice.equalsIgnoreCase("date") && !choice.equalsIgnoreCase("start") && !choice.equalsIgnoreCase("end"));
+                            }while (!choice.equalsIgnoreCase("date") && !choice.equalsIgnoreCase("time"));
 
                             e.change(choice);
                             repeat = !calendar.book(e);
@@ -272,5 +273,50 @@ public class FileController {
             }
         }
 
+    }
+
+    public void saveHolidays()
+    {
+        try {
+            File wFile = new File(holidayFile);
+            FileWriter myWriter = new FileWriter(wFile);
+
+            //each event will be written on 1 row, every next element is spaced out, there's a - after the name and before the descriprion
+            for (LocalDate date : holidays.getHolidays()) {
+                myWriter.write(date.getYear() + "/");
+                myWriter.write(date.getMonth() + "/");
+                myWriter.write(date.getDayOfMonth() + "\n");
+            }
+
+            myWriter.close();
+            System.out.println("Successfully saved the holidays.");
+
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            System.out.println(e.getMessage());
+        }
+    }
+    public void readHolidays()
+    {
+        try {
+            File myObj = new File(holidayFile);
+            Scanner myReader = new Scanner(myObj);
+            Set<LocalDate> holidays = new HashSet<>();
+            String[] line;
+
+            while (myReader.hasNextLine()) {
+                line = myReader.nextLine().split("/");
+                holidays.add(LocalDate.of(Integer.parseInt(line[0]),Month.valueOf(line[1]),Integer.parseInt(line[2])));
+            }
+            myReader.close();
+            if (holidays.isEmpty()) {
+                System.out.println("Holiday file is empty!");
+            }
+            else
+                System.out.println("Successfully read the holidays from file.");
+            this.holidays.setHolidays(holidays);
+        } catch (FileNotFoundException e) {
+            System.out.println("No holiday file found!");
+        }
     }
 }

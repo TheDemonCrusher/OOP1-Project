@@ -42,10 +42,12 @@ public class UI {
         commands.put("showbusy", new ShowBusy());
         commands.put("unbook", new Unbook());
 
+        fileCommands.put("holiday", new Holiday());
         fileCommands.put("merge", new Merge());
         fileCommands.put("read", new Read());
         fileCommands.put("saveas", new SaveAs());
         fileCommands.put("write", new Write());
+        fileController.readHolidays();
     }
 
     /**

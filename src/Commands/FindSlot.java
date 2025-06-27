@@ -3,7 +3,11 @@ package Commands;
 import Interfaces.Command;
 import Models.Calendar;
 import Models.Event;
+import Models.Holidays;
 
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.Month;
 import java.util.List;
 
@@ -45,37 +49,35 @@ public class FindSlot implements Command {
         if(args.length != 3)
             throw new IllegalArgumentException("FindSlot takes 2 arguments! (findslot <fromdate> <hours>) [fromdate format: dd/mm]");
 
-        int hours;
+        LocalTime hours;
+        LocalDate date;
+
+        String[] input = args[1].split("/");
+        if (input.length != 2)
+            throw new IllegalArgumentException("Date must consist of a day and month separated by '/'");
         try{
-            hours = Integer.parseInt(args[2]);
+            date = LocalDate.of(calendar.currentYear.getYear(), Integer.parseInt(input[1]), Integer.parseInt(input[0]));
         }
-        catch(NumberFormatException e)
+        catch(NumberFormatException | DateTimeException e)
         {
-            throw new IllegalArgumentException("Invalid third argument! Hours must be a number!");
+            throw new IllegalArgumentException("Month and day must be valid numbers and represent a real date");
         }
-        if(hours < 0 || hours > 9)
+
+        input = args[2].split(":");
+        if (input.length != 2)
+            throw new IllegalArgumentException("Hours must consist of hours and minutes separated by ':'");
+
+        try{
+            hours = LocalTime.of(Integer.parseInt(input[0]), Integer.parseInt(input[1]));
+        }
+        catch(DateTimeException e)
+        {
+            throw new IllegalArgumentException("Invalid third argument! Hours must be valid numbers and represent a real time!");
+        }
+        if(hours.isAfter(LocalTime.of(9,0)))
             throw new IllegalArgumentException("Event cannot be longer than 9hrs or shorter than 1hr]");
-        String[] date = args[1].split("/");
-        if(date.length != 2)
-            throw new IllegalArgumentException("Date must include day and month separated by / in that order");
 
-        int day, mnt;
-        Month month;
-        try{
-            day = Integer.parseInt(date[0]);
-            mnt = Integer.parseInt(date[1]);
-        }
-        catch(NumberFormatException e)
-        {
-            throw new IllegalArgumentException("Invalid second argument! Invalid date!");
-        }
-        if(mnt < 0 || mnt > 12)
-            throw new IllegalArgumentException("Month cannot be less than 0 or greater than 12");
-        month = Month.of(mnt);
-        if(day < 0 || day > month.length(calendar.currentYear.isLeapYear()))
-            throw new IllegalArgumentException("Invalid day in first argument! Day cannot be 0 or surpass " + month.length(calendar.currentYear.isLeapYear()) + " during " + month);
-
-        List<Event> results = calendar.findSlot(day, mnt, hours);
+        List<Event> results = calendar.findSlot(date, hours);
 
         if(results != null)
         {
